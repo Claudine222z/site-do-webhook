@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="header-section">
+        <h1><i class="fas fa-webhook"></i> Gerenciador de Webhooks</h1>
+        <p>Crie e gerencie seus webhooks de forma simples e eficiente</p>
+    </div>
+
+    <div class="create-webhook-section">
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-plus-circle"></i> Criar Novo Webhook</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('create_webhook') }}" class="webhook-form">
+                    <div class="form-group">
+                        <label for="name">Nome do Webhook:</label>
+                        <input type="text" id="name" name="name" placeholder="Ex: meu_bot_telegram" required>
+                        <small>Apenas letras, números e underscore são permitidos</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Criar Webhook
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="webhooks-section">
+        <div class="section-header">
+            <h2><i class="fas fa-list"></i> Webhooks Ativos</h2>
+            <span class="webhook-count">{{ webhooks|length }} webhook(s)</span>
+        </div>
+
+        {% if webhooks %}
+            <div class="webhooks-grid">
+                {% for webhook in webhooks %}
+                <div class="webhook-card">
+                    <div class="webhook-header">
+                        <div class="webhook-name">
+                            <i class="fas fa-robot"></i>
+                            <span>{{ webhook.name }}</span>
+                        </div>
+                        <div class="webhook-status">
+                            <span class="status-badge {{ 'active' if webhook.is_active else 'inactive' }}">
+                                {{ 'Ativo' if webhook.is_active else 'Inativo' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="webhook-info">
+                        <div class="info-item">
+                            <label>Endpoint:</label>
+                            <div class="endpoint-url">
+                                <code>{{ request.host_url }}webhook/{{ webhook.name }}</code>
+                                <button class="copy-btn" onclick="copyToClipboard('{{ request.host_url }}webhook/{{ webhook.name }}')">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <label>Token:</label>
+                            <div class="token-field">
+                                <code class="token-value">{{ webhook.token }}</code>
+                                <button class="copy-btn" onclick="copyToClipboard('{{ webhook.token }}')">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="webhook-stats">
+                            <div class="stat">
+                                <i class="fas fa-chart-line"></i>
+                                <span>{{ webhook.request_count }} requisições</span>
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-clock"></i>
+                                <span>Criado em {{ webhook.created_at.strftime('%d/%m/%Y') }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="webhook-actions">
+                        <a href="{{ url_for('webhook_details', webhook_id=webhook.id) }}" class="btn btn-info">
+                            <i class="fas fa-eye"></i> Detalhes
+                        </a>
+                        
+                        <form method="POST" action="{{ url_for('toggle_webhook', webhook_id=webhook.id) }}" style="display: inline;">
+                            <button type="submit" class="btn {{ 'btn-warning' if webhook.is_active else 'btn-success' }}">
+                                <i class="fas fa-{{ 'pause' if webhook.is_active else 'play' }}"></i>
+                                {{ 'Desativar' if webhook.is_active else 'Ativar' }}
+                            </button>
+                        </form>
+                        
+                        <form method="POST" action="{{ url_for('delete_webhook', webhook_id=webhook.id) }}" 
+                              style="display: inline;" 
+                              onsubmit="return confirm('Tem certeza que deseja deletar o webhook {{ webhook.name }}?')">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Deletar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-webhook"></i>
+                </div>
+                <h3>Nenhum webhook criado ainda</h3>
+                <p>Crie seu primeiro webhook usando o formulário acima</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
