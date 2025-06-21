@@ -18,6 +18,50 @@
                 <a href="{{ url_for('index') }}" class="nav-link">
                     <i class="fas fa-home"></i> Dashboard
                 </a>
+                
+                <!-- DROPDOWN DE PERFIL -->
+                <div class="profile-dropdown">
+                    <button class="profile-btn" onclick="toggleProfileDropdown()">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span class="profile-name">{{ current_user.username }}</span>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </button>
+                    
+                    <div class="dropdown-menu" id="profileDropdown">
+                        <div class="dropdown-header">
+                            <div class="user-info">
+                                <div class="user-avatar">
+                                    <i class="fas fa-user-circle"></i>
+                                </div>
+                                <div class="user-details">
+                                    <strong>{{ current_user.username }}</strong>
+                                    <small>{{ current_user.email }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                        <a href="{{ url_for('profile') }}" class="dropdown-item">
+                            <i class="fas fa-user-cog"></i>
+                            <span>Meu Perfil</span>
+                        </a>
+                        
+                        <a href="{{ url_for('change_password') }}" class="dropdown-item">
+                            <i class="fas fa-key"></i>
+                            <span>Alterar Senha</span>
+                        </a>
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                        <a href="{{ url_for('logout') }}" class="dropdown-item logout-item">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Sair</span>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -38,7 +82,7 @@
                 </div>
             {% endif %}
         {% endwith %}
-
+        
         {% block content %}{% endblock %}
     </main>
 
