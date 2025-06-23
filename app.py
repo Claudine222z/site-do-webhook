@@ -30,12 +30,11 @@ instance_path = ensure_instance_folder()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-key-change-in-production-VERY-IMPORTANT')
 
-# Configurar banco
-db_path = os.path.join(instance_path, 'webhooks.db')
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-print(f"🗄️ Banco configurado em: {db_path}")
+print(f"🗄️ Banco configurado via variável .env")
+
 
 # Inicializar SQLAlchemy e Login Manager
 db = SQLAlchemy(app)

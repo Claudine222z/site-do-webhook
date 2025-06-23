@@ -1,8 +1,9 @@
 import os
-from datetime import timedelta
+from dotenv import load_dotenv
 
-class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///webhooks.db'
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    PERMANENT_SESSION_LIFETIME = timedelta(hours=1)
+load_dotenv()
+
+SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
+SQLALCHEMY_TRACK_MODIFICATIONS = False
+SECRET_KEY = os.getenv("SECRET_KEY")
+print("USANDO DATABASE:", os.getenv("DATABASE_URL"))
