@@ -440,7 +440,7 @@ function toggleDarkMode() {
     
     localStorage.setItem('darkMode', isDark);
     
-    // Adicionar estilos do tema escuro se não existirem
+// Adicionar estilos do tema escuro se não existirem
     if (!document.querySelector('#dark-mode-styles')) {
         const style = document.createElement('style');
         style.id = 'dark-mode-styles';
@@ -656,6 +656,7 @@ if ('serviceWorker' in navigator) {
             });
     });
 }
+
 // Profile Dropdown
 function toggleProfileDropdown() {
     const dropdown = document.querySelector('.profile-dropdown');
@@ -667,98 +668,7 @@ document.addEventListener('click', function(event) {
     const dropdown = document.querySelector('.profile-dropdown');
     const profileBtn = document.querySelector('.profile-btn');
     
-    if (!dropdown.contains(event.target)) {
+    if (dropdown && !dropdown.contains(event.target) && !profileBtn.contains(event.target)) {
         dropdown.classList.remove('active');
     }
 });
-
-// Existing functions...
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(function() {
-        // Criar notificação de sucesso
-        const notification = document.createElement('div');
-        notification.className = 'copy-notification';
-        notification.textContent = 'Copiado!';
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.remove();
-        }, 2000);
-    });
-}
-
-// Adicione estilo para a notificação
-const style = document.createElement('style');
-style.textContent = `
-    .copy-notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #28a745;
-        color: white;
-        padding: 12px 20px;
-        border-radius: 6px;
-        font-size: 14px;
-        z-index: 10000;
-        animation: slideIn 0.3s ease;
-    }
-    
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-`;
-document.head.appendChild(style);
-// Profile Dropdown
-function toggleProfileDropdown() {
-    const dropdown = document.querySelector('.profile-dropdown');
-    dropdown.classList.toggle('active');
-}
-
-// Fechar dropdown ao clicar fora
-document.addEventListener('click', function(event) {
-    const dropdown = document.querySelector('.profile-dropdown');
-    const profileBtn = document.querySelector('.profile-btn');
-    
-    if (!dropdown.contains(event.target)) {
-        dropdown.classList.remove('active');
-    }
-});
-
-// Existing functions...
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(function() {
-        // Criar notificação de sucesso
-        const notification = document.createElement('div');
-        notification.className = 'copy-notification';
-        notification.textContent = 'Copiado!';
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.remove();
-        }, 2000);
-    });
-}
-
-// Adicione estilo para a notificação
-const style = document.createElement('style');
-style.textContent = `
-    .copy-notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #28a745;
-        color: white;
-        padding: 12px 20px;
-        border-radius: 6px;
-        font-size: 14px;
-        z-index: 10000;
-        animation: slideIn 0.3s ease;
-    }
-    
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-`;
-document.head.appendChild(style);
