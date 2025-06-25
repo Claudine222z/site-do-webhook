@@ -35,7 +35,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 print(f"🗄️ Banco configurado via variável .env")
 
-
 # Inicializar SQLAlchemy e Login Manager
 db = SQLAlchemy(app)
 login_manager = LoginManager()
@@ -266,17 +265,54 @@ def receive_webhook(webhook_name):
     if not webhook:
         return jsonify({'error': 'Webhook não encontrado'}), 404
     
-    # Verificar token se fornecido
-    auth_header = request.headers.get('Authorization', '')
-    if auth_header.startswith('Bearer '):
-        provided_token = auth_header[7:]
-        if provided_token != webhook.token:
-            return jsonify({'error': 'Token inválido'}), 401
+    # VERIFICAÇÃO DE WEBHOOK (GET) - Para WhatsApp/Meta
+    if request.method == 'GET':
+        # Verificação do webhook do WhatsApp/Meta
+        hub_mode = request.args.get('hub.mode')
+        hub_challenge = request.args.get('hub.challenge')
+        hub_verify_token = request.args.get('hub.verify_token')
+        
+        # Log da tentativa de verificação
+        try:
+            log = WebhookLog(
+                webhook_id=webhook.id,
+                method=request.method,
+                headers=json.dumps(dict(request.headers)),
+                body=f"hub.mode={hub_mode}, hub.challenge={hub_challenge}, hub.verify_token={hub_verify_token}",
+                ip_address=request.remote_addr,
+                user_agent=request.headers.get('User-Agent', '')
+            )
+            db.session.add(log)
+            db.session.commit()
+        except Exception as e:
+            print(f"Erro ao salvar log de verificação: {e}")
+        
+        # Verificar se é uma tentativa de verificação válida
+        if hub_mode == 'subscribe' and hub_challenge:
+            # Para simplicidade, aceita qualquer token de verificação
+            # Você pode configurar um token específico depois
+            print(f"Webhook {webhook_name} verificado com sucesso!")
+            return hub_challenge, 200
+        
+        # Se não é verificação, retorna resposta padrão para GET
+        return jsonify({
+            'status': 'webhook_active',
+            'webhook': webhook_name,
+            'timestamp': datetime.utcnow().isoformat()
+        }), 200
     
-    # Capturar dados da requisição
+    # PROCESSAMENTO DE WEBHOOKS (POST, PUT, etc.)
     try:
+        # Capturar dados da requisição
         body_data = request.get_data(as_text=True)
         headers_data = dict(request.headers)
+        
+        # Verificar token Bearer se fornecido
+        auth_header = request.headers.get('Authorization', '')
+        if auth_header.startswith('Bearer '):
+            provided_token = auth_header[7:]
+            if provided_token != webhook.token:
+                return jsonify({'error': 'Token inválido'}), 401
         
         # Criar log
         log = WebhookLog(
@@ -304,6 +340,7 @@ def receive_webhook(webhook_name):
         
     except Exception as e:
         db.session.rollback()
+        print(f"Erro ao processar webhook {webhook_name}: {e}")
         return jsonify({'error': f'Erro interno: {str(e)}'}), 500
 
 @app.route('/webhook/<int:webhook_id>/toggle', methods=['POST'])
@@ -380,6 +417,22 @@ def change_password():
         return redirect(url_for('profile'))
     
     return render_template('change_password.html')
+
+# Rota para testar se o webhook está funcionando
+@app.route('/test-webhook/<webhook_name>')
+def test_webhook(webhook_name):
+    """Rota para testar se o webhook está acessível"""
+    webhook = Webhook.query.filter_by(name=webhook_name, is_active=True).first()
+    
+    if not webhook:
+        return jsonify({'error': 'Webhook não encontrado'}), 404
+    
+    return jsonify({
+        'status': 'online',
+        'webhook': webhook_name,
+        'message': 'Webhook está funcionando corretamente',
+        'timestamp': datetime.utcnow().isoformat()
+    }), 200
 
 # INICIALIZAÇÃO
 if __name__ == '__main__':
